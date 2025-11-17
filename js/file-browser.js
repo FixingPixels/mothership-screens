@@ -48,8 +48,8 @@
 // CONFIGURATION
 // ============================================================================
 const CONFIG = {
-    SHEET_ID: '1qy6CMeOH8qf508wfTs3RAFdsSCO_hNnShE2Z1mHXZzI', // Replace with your Google Sheet ID (from URL: docs.google.com/spreadsheets/d/{THIS_IS_THE_ID}/edit)
-    API_KEY: 'AIzaSyB8GH1-iSNqGPd2t9ZWk61UTrurjoBWVBE',  // Replace with your Google Sheets API key (from Google Cloud Console)
+    SHEET_ID: '', // Replace with your Google Sheet ID (from URL: docs.google.com/spreadsheets/d/{THIS_IS_THE_ID}/edit)
+    API_KEY: '',  // Replace with your Google Sheets API key (from Google Cloud Console)
     DIRECTORY_TAB_NAME: 'Directory',
     CONTENT_TAB_NAME: 'Content'
 };

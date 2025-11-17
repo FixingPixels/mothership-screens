@@ -24,8 +24,8 @@
 // CONFIGURATION
 // ============================================================================
 const CONFIG = {
-    SHEET_ID: '1qy6CMeOH8qf508wfTs3RAFdsSCO_hNnShE2Z1mHXZzI', // Replace with your Google Sheet ID
-    API_KEY: 'AIzaSyB8GH1-iSNqGPd2t9ZWk61UTrurjoBWVBE',  // Replace with your Google Sheets API key
+    SHEET_ID: '', // Replace with your Google Sheet ID
+    API_KEY: '',  // Replace with your Google Sheets API key
     CAMS_TAB_NAME: 'Cams'
 };
 
