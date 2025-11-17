@@ -2,6 +2,10 @@
 
 Dynamic Lo-Fi / Sci-Fi Screens and Interfaces powered by Google Sheets. Created for use in Mothership RPG.
 
+### VIDEO DEMO
+
+[![Watch the Demo](img/muthercms-poster.png)](https://www.youtube.com/watch?v=z0YytBTCguI)
+
 ## Overview
 
 This system provides six main components:
