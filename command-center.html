@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Command Center</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MUTHER-8800 :: COMMAND // CONTROL</title>
+  <style>
+    :root{
+      --bg:#0b0d0f; --panel:#111418; --border:#20252b; --text:#d6d6d6; --muted:#8b8f96;
+      --green:#58d38c; --yellow:#f0c44c; --red:#ff5a63; --primary:#fcee0a;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 900px at 30% -10%,#14181c 0%,#0b0d0f 60%,#07090b 100%);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+    .wrap{display:grid;grid-template-rows:auto 1fr auto;min-height:100%}
+    header,footer{border:1px solid var(--border);background:linear-gradient(#0c0f12,#0a0c0e);}
+    header{padding:10px 12px;position:sticky;top:0;z-index:10}
+    header h1{margin:0;font-size:16px;letter-spacing:.12em;color:var(--primary)}
+    header small{color:var(--muted)}
+    footer{padding:8px 12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+
+    main{display:grid;gap:12px;padding:12px;grid-template-columns:260px 1fr 300px;}
+    .card{background:linear-gradient(180deg,#0e1216 0%,#0b0e12 100%);border:1px solid var(--border);border-radius:10px;box-shadow:0 0 0 1px rgba(255,255,255,0.02) inset;}
+    .panel{padding:10px}
+
+    /* Systems list */
+    .sys{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:center;padding:8px;border:1px solid #1b2026;border-radius:8px;margin-bottom:8px;background:#0b0f13}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.green{background:var(--green)}
+    .dot.yellow{background:var(--yellow)}
+    .dot.red{background:var(--red)}
+    .label{font-weight:600;letter-spacing:.06em}
+    .sub{color:var(--muted);font-size:12px}
+    .bar{height:8px;background:#0b0d10;border:1px solid #20242a;border-radius:999px;overflow:hidden}
+    .bar>i{display:block;height:100%;background:linear-gradient(90deg,#1a6030,#49b073);}
+    .kv{display:grid;grid-template-columns:auto 1fr;gap:6px;font-size:12px;color:var(--muted)}
+
+    /* Center graph */
+    .graph{height:180px;position:relative;overflow:hidden;border-radius:10px}
+    canvas{display:block;width:100%;height:100%}
+    .gridlines{position:absolute;inset:0;background:repeating-linear-gradient( to bottom, rgba(255,255,255,.04) 0 1px, transparent 1px 22px), repeating-linear-gradient(to right, rgba(255,255,255,.035) 0 1px, transparent 1px 28px)}
+
+    /* Alerts */
+    .alerts{height:180px;overflow:auto;padding:8px}
+    .alert{padding:8px;border:1px solid #222830;border-radius:8px;margin:6px 0;background:#0b0e12}
+    .alert.warn{border-color:#3b310f;}
+    .alert.crit{border-color:#3a1417;background:linear-gradient(180deg,#14090b,#0b0b0b)}
+    .alert time{color:var(--muted);font-size:12px}
+
+    /* Controls */
+    .control{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid #1b2026;border-radius:8px;margin-bottom:8px;background:#0b0f13}
+    .btn{appearance:none;border:1px solid var(--border);background:#0f1418;color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600;letter-spacing:.06em}
+    .btn:hover{filter:brightness(1.2)}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .pill{padding:2px 8px;border:1px solid var(--border);border-radius:999px;font-size:11px;color:var(--muted)}
+
+    /* CRT + Glitch */
+    .crt:before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.04),rgba(0,0,0,0) 2px);background-size:100% 3px;mix-blend-mode:overlay;pointer-events:none}
+    .pulse-red{animation:pulseRed 1.2s infinite}
+    @keyframes pulseRed{0%,100%{box-shadow:0 0 0 0 rgba(255,90,99,.35)}50%{box-shadow:0 0 18px 2px rgba(255,90,99,.25)}}
+    .scanline{position:absolute;left:0;right:0;height:2px;background:rgba(255,255,255,.08);animation:scan 5s linear infinite}
+    @keyframes scan{0%{top:-2px}100%{top:100%}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>MUTHER-8800 :: COMMAND // CONTROL</h1>
+    <small id="meta">MISSION: DEEP SURVEY // PHASE 2 :: SHIP WY-88</small>
+  </header>
+
+  <main>
+    <!-- LEFT: SYSTEMS -->
+    <section class="card panel" id="systemsPanel" aria-label="Systems Overview"></section>
+
+    <!-- CENTER: GRAPH + POWER + ALERTS -->
+    <section class="card panel" style="padding:0">
+      <div class="graph crt" id="graphWrap">
+        <canvas id="reactorCanvas"></canvas>
+        <div class="gridlines"></div>
+        <i class="scanline"></i>
+      </div>
+      <div class="panel" style="border-top:1px solid var(--border)">
+        <h3 style="margin:0 0 8px 0;letter-spacing:.08em">POWER ROUTING</h3>
+        <div id="powerRouting" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+      </div>
+      <div class="panel" style="border-top:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <h3 style="margin:0;letter-spacing:.08em">ALERT FEED</h3>
+          <span class="pill" id="threatPill">THREAT 0</span>
+        </div>
+        <div class="alerts" id="alertFeed" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: CONTROLS -->
+    <section class="card panel" id="controlsPanel" aria-label="Controls"></section>
+  </main>
+
+  <footer>
+    <div>CREW ONLINE [4] :: AUTH LVL ≤ 3</div>
+    <div id="clock">MISSION CLOCK // --:--:--</div>
+  </footer>
+</div>
+
+<script>
+// ---------------------------
+//  PSEUDO-INTERACTIVE C&C
+//  (No external data; sheet hooks later)
+// ---------------------------
+const state = {
+  threat: 0,
+  systems: [
+    {id:'SYS-LIFE', name:'LIFE SUPPORT', power:72, integrity:93, temp:22, status:'NOMINAL'},
+    {id:'SYS-REAC', name:'REACTOR CORE', power:81, integrity:74, temp:412, status:'WARNING'},
+    {id:'SYS-COMM', name:'COMMS ARRAY', power:55, integrity:88, temp:34, status:'NOMINAL'},
+    {id:'SYS-NAV',  name:'NAVIGATION', power:60, integrity:90, temp:28, status:'NOMINAL'},
+    {id:'SYS-SEC',  name:'SECURITY', power:47, integrity:86, temp:26, status:'NOMINAL'}
+  ],
+  controls: [
+    {id:'CTRL-AUX',  label:'REROUTE AUX POWER', type:'toggle', target:'SYS-REAC', cooldown:6, locked:false},
+    {id:'CTRL-VENT', label:'CYCLE ATMOS VENTS', type:'button', target:'SYS-LIFE', cooldown:12, locked:true},
+    {id:'CTRL-LCK',  label:'SEAL BULKHEADS', type:'button', target:'SYS-SEC', cooldown:10, locked:false},
+    {id:'CTRL-DIAG', label:'RUN CORE DIAGNOSTIC', type:'button', target:'SYS-REAC', cooldown:7, locked:false}
+  ],
+  routing: [
+    {id:'R-LIFE', label:'LIFE', val:28},
+    {id:'R-REAC', label:'CORE', val:36},
+    {id:'R-NAV',  label:'NAV',  val:18}
+  ]
+};
+
+// Utility
+const $ = (sel, root=document) => root.querySelector(sel);
+const el = (tag, props={},{children=[]}={})=>{
+  const n = Object.assign(document.createElement(tag), props);
+  [].concat(children).filter(Boolean).forEach(c=>n.append(c));
+  return n;
+};
+function nowStamp(){
+  const d=new Date();
+  return d.toLocaleString(undefined,{hour12:false});
+}
+
+// Render Systems Panel
+function renderSystems(){
+  const wrap = $('#systemsPanel');
+  wrap.innerHTML = '<h3 style="margin:0 0 8px 0;letter-spacing:.08em">SYSTEMS</h3>';
+  state.systems.forEach(s=>{
+    const dotClass = s.status==='NOMINAL'?'green':(s.status==='WARNING'?'yellow':'red');
+    const box = el('div',{className:'sys '+(s.status==='CRITICAL'?'pulse-red':'')});
+    const dot = el('i',{className:'dot '+dotClass});
+    const head = el('div',{}, {children:[
+      el('div',{className:'label',textContent:s.name}),
+      el('div',{className:'sub',textContent:`PWR ${s.power}% // INT ${s.integrity}% // TEMP ${s.temp}°C // ${s.status}`})
+    ]});
+    const bar = el('div',{className:'bar'});
+    const fill = el('i',{style:`width:${s.power}%;`});
+    bar.append(fill);
+    box.append(dot, head, el('div',{style:'grid-column:1 / -1;margin-top:6px'}, {children:[bar]}));
+    wrap.append(box);
+  });
+}
+
+// Render Power Routing
+function renderRouting(){
+  const host = $('#powerRouting');
+  host.innerHTML = '';
+  state.routing.forEach(r=>{
+    const card = el('div',{className:'card',style:'padding:8px'});
+    const lab = el('div',{textContent:`${r.label} // ${r.val}%`,style:'letter-spacing:.08em;margin-bottom:6px'});
+    const bar = el('div',{className:'bar'});
+    const fill = el('i',{style:`width:${r.val}%;`});
+    bar.append(fill);
+    card.append(lab, bar);
+    host.append(card);
+  });
+}
+
+// Render Controls
+function renderControls(){
+  const host = $('#controlsPanel');
+  host.innerHTML = '<h3 style="margin:0 0 8px 0;letter-spacing:.08em">CONTROLS</h3>';
+  state.controls.forEach(c=>{
+    const row = el('div',{className:'control'});
+    row.append(
+      el('div',{}, {children:[
+        el('div',{className:'label',textContent:c.label}),
+        el('div',{className:'sub',textContent:`TARGET: ${c.target} // COOLDOWN: ${c.cooldown}s`})
+      ]}),
+      el('div',{}, {children:[
+        el('span',{className:'pill',textContent: c.locked?'LOCKED':'ARMED'}),
+        (function(){
+          const b = el('button',{className:'btn',textContent:(c.type==='toggle'?'TOGGLE':'EXECUTE')});
+          b.disabled = c.locked;
+          b.addEventListener('click',()=>handleControl(c,b));
+          return b;
+        })()
+      ]})
+    );
+    host.append(row);
+  });
+}
+
+// Alerts
+function pushAlert(msg, level='info'){
+  const feed = $('#alertFeed');
+  const a = el('div',{className:'alert '+(level==='crit'?'crit':(level==='warn'?'warn':''))});
+  a.append(
+    el('div',{style:'display:flex;justify-content:space-between;gap:8px;align-items:center'}, {children:[
+      el('strong',{textContent:msg}),
+      el('time',{textContent:new Date().toLocaleTimeString([], {hour12:false})})
+    ]})
+  );
+  feed.prepend(a);
+}
+
+// Control handler (pseudo)
+function handleControl(ctrl, button){
+  if (ctrl.locked) return;
+  button.disabled = true;
+  const sys = state.systems.find(s=>s.id===ctrl.target);
+
+  // Local feedback
+  switch(ctrl.id){
+    case 'CTRL-AUX': {
+      const boost = 8 + Math.round(Math.random()*6);
+      sys.power = Math.min(99, sys.power + boost);
+      pushAlert(`AUX POWER REROUTED → ${sys.name} +${boost}%`, 'warn');
+      degradeAfter(ctrl.cooldown, ()=>{
+        sys.power = Math.max(15, sys.power - boost); // auto-revert
+        pushAlert(`AUTO-REVERT: AUX POWER NORMALIZED`, 'info');
+      });
+      break;
+    }
+    case 'CTRL-VENT': {
+      pushAlert(`VENT CYCLE REQUESTED → ${sys.name} :: ACCESS DENIED (AUTH LVL 4)`, 'warn');
+      // No actual effect (illusion)
+      break;
+    }
+    case 'CTRL-LCK': {
+      pushAlert(`BULKHEAD SEALS ENGAGED → ${sys.name}`, 'warn');
+      sys.integrity = Math.min(99, sys.integrity + 6);
+      degradeAfter(ctrl.cooldown, ()=>{
+        sys.integrity = Math.max(40, sys.integrity - 6);
+        pushAlert(`AUTO-RELEASE: BULKHEADS RETURNED TO NORMAL`, 'info');
+      });
+      break;
+    }
+    case 'CTRL-DIAG': {
+      pushAlert(`DIAGNOSTIC STARTED → ${sys.name} :: CORE DRIFT ANALYSIS`, 'info');
+      setTimeout(()=>{
+        const drift = (Math.random()*1.6+0.2).toFixed(1);
+        pushAlert(`DIAGNOSTIC RESULT: CORE DRIFT +${drift}%`, drift>1.4?'crit':'warn');
+        if (drift>1.4){ sys.status='CRITICAL'; }
+      }, 1600);
+      break;
+    }
+  }
+
+  renderSystems();
+  // Cooldown UI
+  let t = ctrl.cooldown, baseText = button.textContent;
+  const iv = setInterval(()=>{
+    t--; button.textContent = baseText+` (${t})`;
+    if (t<=0){ clearInterval(iv); button.textContent = baseText; button.disabled=false; }
+  },1000);
+}
+
+function degradeAfter(sec, fn){ setTimeout(fn, sec*1000); }
+
+// Threat progression
+function tickThreat(){
+  state.threat++;
+  $('#threatPill').textContent = `THREAT ${state.threat}`;
+
+  // Autonomous degradation
+  state.systems.forEach(s=>{
+    const nud = (Math.random()*2)|0; // 0..1
+    s.integrity = Math.max(35, s.integrity - nud);
+    // status mapping
+    if (s.integrity < 60 || s.temp>430) { s.status = 'CRITICAL'; }
+    else if (s.integrity < 80) { s.status = 'WARNING'; }
+    else { s.status = 'NOMINAL'; }
+  });
+
+  // Random alert
+  const pool = [
+    'POWER FLUCTUATION DETECTED',
+    'COOLANT FLOW IRREGULARITY',
+    'MINOR HULL STRESS – MONITOR',
+    'SENSOR BLIND SPOT IN AFT ARRAY',
+    'RADIATION SPIKE (LOW)'
+  ];
+  const msg = pool[Math.floor(Math.random()*pool.length)];
+  pushAlert(`${msg}`, Math.random()>.7?'warn':'info');
+  renderSystems();
+}
+
+// Reactor graph (canvas)
+const graph = {
+  pts: new Array(160).fill(0).map((_,i)=>60+Math.sin(i/6)*18 + Math.random()*6),
+  canvas: null, ctx: null
+};
+function initGraph(){
+  graph.canvas = $('#reactorCanvas');
+  const dpr = window.devicePixelRatio||1;
+  const rect = graph.canvas.getBoundingClientRect();
+  graph.canvas.width = rect.width*dpr; graph.canvas.height = rect.height*dpr;
+  graph.ctx = graph.canvas.getContext('2d');
+}
+function stepGraph(){
+  graph.pts.shift();
+  const last = graph.pts[graph.pts.length-1];
+  const next = Math.max(10, Math.min(120, last + (Math.random()*6-3)));
+  graph.pts.push(next);
+  const {ctx, canvas} = graph;
+  if (!ctx) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.strokeStyle = '#49b073'; ctx.lineWidth = 2; ctx.globalAlpha=.95;
+  ctx.beginPath();
+  const w = canvas.width, h = canvas.height, n = graph.pts.length;
+  for (let i=0;i<n;i++){
+    const x = i*(w/(n-1));
+    const y = h - (graph.pts[i]/120)*h;
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Clock
+function tickClock(){ $('#clock').textContent = 'MISSION CLOCK // '+new Date().toLocaleString([], {hour12:false}); }
+
+// Boot
+function boot(){
+  renderSystems();
+  renderRouting();
+  renderControls();
+  initGraph();
+  pushAlert('SYSTEM BOOT SEQUENCE COMPLETE','info');
+  setInterval(stepGraph, 90);
+  setInterval(tickThreat, 12000);
+  setInterval(tickClock, 1000);
+}
+
+window.addEventListener('resize', initGraph);
+boot();
+</script>
+</body>
+</html>
+    
+  </body>
+  
+</html>

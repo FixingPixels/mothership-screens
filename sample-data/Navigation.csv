@@ -1,0 +1,8 @@
+terminalId,menuLabel,order,action,isVisible,url
+Boot-Screen,,,,FALSE,
+Mission-Briefing,Mission Briefing,1,navigate,TRUE,
+Crew-Manifest,Crew Manifest,2,navigate,TRUE,
+Session-Details,Session Details,3,navigate,TRUE,
+Handbook-Download,Download the Crew Operations and Survival Handbook,4,openurl,TRUE,https://collett.me/wp-content/uploads/2025/10/Mothership_Players_Survival_Guide.pdf
+Log-Off,Log Off,5,logoff,TRUE,
+

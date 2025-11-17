@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MUTHER-8800 :: PERSONNEL MONITOR</title>
+  <style>
+    :root{
+      --bg:#0b0d0f; --panel:#111418; --border:#20252b; --text:#d6d6d6; --muted:#8b8f96;
+      --green:#58d38c; --yellow:#f0c44c; --red:#ff5a63; --primary:#fcee0a;
+      --cyan:#4dd0e1; --amber:#ffb74d;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 900px at 30% -10%,#14181c 0%,#0b0d0f 60%,#07090b 100%);color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+    .wrap{display:grid;grid-template-rows:auto 1fr auto;min-height:100%}
+    header,footer{border:1px solid var(--border);background:linear-gradient(#0c0f12,#0a0c0e);}
+    header{padding:10px 12px;position:sticky;top:0;z-index:10}
+    header h1{margin:0;font-size:16px;letter-spacing:.12em;color:var(--primary)}
+    header small{color:var(--muted)}
+    footer{padding:8px 12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+
+    main{display:grid;gap:12px;padding:12px;grid-template-columns:25% 75%;}
+    .card{background:linear-gradient(180deg,#0e1216 0%,#0b0e12 100%);border:1px solid var(--border);border-radius:10px;box-shadow:0 0 0 1px rgba(255,255,255,0.02) inset;}
+    .panel{padding:10px}
+
+    /* Squad list */
+    .squad-list{overflow-y:auto;max-height:calc(100vh - 140px);}
+    .person-card{display:grid;grid-template-columns:60px 1fr;gap:10px;padding:10px;border:1px solid #1b2026;border-radius:8px;margin-bottom:8px;background:#0b0f13;cursor:pointer;transition:border-color 0.2s;}
+    .person-card:hover{border-color:var(--primary);}
+    .person-card.selected{border-color:var(--primary);box-shadow:0 0 8px rgba(252,238,10,0.3);}
+    .portrait-wrap{position:relative;width:50px;height:50px;}
+    .portrait{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#2a2f35,#1a1f25);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:var(--text);position:relative;z-index:1;}
+    .stress-ring{position:absolute;inset:-4px;border-radius:50%;border:2px solid;z-index:0;transition:border-color 0.3s;}
+    .stress-ring.calm{border-color:var(--cyan);}
+    .stress-ring.elevated{border-color:var(--amber);}
+    .stress-ring.panic{border-color:var(--red);animation:pulseRed 1.2s infinite;}
+    .person-info{display:flex;flex-direction:column;gap:4px;}
+    .person-name{font-weight:600;letter-spacing:.06em;font-size:13px;}
+    .person-role{color:var(--muted);font-size:11px;}
+    .health-bar{height:6px;background:#0b0d10;border:1px solid #20242a;border-radius:999px;overflow:hidden;margin-top:4px;}
+    .health-bar>i{display:block;height:100%;transition:width 0.3s;}
+    .health-bar>i.green{background:linear-gradient(90deg,#1a6030,#49b073);}
+    .health-bar>i.yellow{background:linear-gradient(90deg,#6b5a1a,#b89a3a);}
+    .health-bar>i.red{background:linear-gradient(90deg,#5a1a1a,#b03a3a);}
+    .health-bar>i.black{background:#000;}
+    .mini-vitals{display:flex;gap:8px;font-size:10px;color:var(--muted);margin-top:4px;}
+    .vital-item{position:relative;}
+    .sparkline{position:absolute;left:0;right:0;bottom:-8px;height:8px;opacity:0.4;}
+    .env-band{height:4px;border-radius:2px;margin-top:4px;font-size:9px;padding:2px 4px;text-align:center;color:var(--text);}
+    .env-band.safe{background:var(--green);}
+    .env-band.warning{background:var(--yellow);}
+    .env-band.danger{background:var(--red);}
+
+    /* Detail view */
+    .detail-view{display:flex;flex-direction:column;gap:12px;}
+    .detail-section{background:#0b0e12;border:1px solid var(--border);border-radius:8px;padding:12px;}
+    .detail-section h3{margin:0 0 10px 0;letter-spacing:.08em;font-size:13px;color:var(--primary);}
+    .vitals-grid{display:grid;grid-template-columns:1fr 200px;gap:16px;}
+    .bio-channels{display:flex;flex-direction:column;gap:12px;}
+    .channel{position:relative;height:50px;border:1px solid #1b2026;border-radius:4px;padding:4px;}
+    .channel-label{position:absolute;top:2px;left:4px;font-size:9px;color:var(--muted);z-index:1;}
+    .channel-value{position:absolute;top:2px;right:4px;font-size:10px;color:var(--text);z-index:1;}
+    .channel canvas{display:block;width:100%;height:100%;}
+    .body-silhouette{display:flex;flex-direction:column;align-items:center;gap:8px;}
+    .silhouette{width:120px;height:180px;position:relative;}
+    .silhouette img{width:100%;height:100%;object-fit:contain;display:block;}
+    .body-zone-overlay{position:absolute;background:rgba(255,90,99,0.4);border-radius:4px;pointer-events:none;transition:all 0.3s;filter:drop-shadow(0 0 4px rgba(255,90,99,0.6));animation:pulseRed 1.5s infinite;}
+    .status-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .status-tag{padding:3px 8px;border:1px solid var(--border);border-radius:4px;font-size:10px;color:var(--red);}
+
+    /* Cognitive panel */
+    .cognitive-grid{display:grid;grid-template-columns:120px 1fr auto;gap:16px;align-items:start;}
+    .stress-gauge{display:flex;flex-direction:column;gap:4px;}
+    .gauge-bar{width:20px;height:120px;background:#0b0d10;border:1px solid #20242a;border-radius:999px;position:relative;overflow:hidden;}
+    .gauge-fill{position:absolute;bottom:0;width:100%;background:linear-gradient(to top,var(--cyan) 0%,var(--amber) 50%,var(--red) 100%);transition:height 0.3s;}
+    .gauge-bands{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:2px;font-size:8px;color:var(--muted);}
+    .gauge-label{font-size:10px;text-align:center;margin-top:4px;}
+    .cognitive-timeline{flex:1;height:80px;border:1px solid #1b2026;border-radius:4px;position:relative;}
+    .cognitive-timeline canvas{display:block;width:100%;height:100%;}
+    .tremor-indicator{display:flex;flex-direction:column;align-items:center;gap:4px;}
+    .tremor-value{font-size:18px;font-weight:bold;color:var(--text);}
+    .tremor-icon{font-size:24px;animation:tremor 0.1s infinite;}
+    @keyframes tremor{0%,100%{transform:translateX(0);}25%{transform:translateX(-1px) rotate(-0.5deg);}75%{transform:translateX(1px) rotate(0.5deg);}}
+    .mental-state{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;}
+
+    /* Suit & Environment */
+    .suit-env-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .suit-panel{display:flex;flex-direction:column;gap:10px;}
+    .integrity-ring{width:80px;height:80px;border-radius:50%;border:4px solid var(--border);position:relative;display:flex;align-items:center;justify-content:center;margin:0 auto;}
+    .integrity-ring::before{content:attr(data-value);position:absolute;font-size:12px;font-weight:bold;}
+    .pressure-bar{display:flex;align-items:center;gap:8px;font-size:10px;}
+    .pressure-markers{display:flex;flex:1;height:20px;border:1px solid #1b2026;border-radius:4px;position:relative;background:#0b0d10;}
+    .pressure-int,.pressure-ext{position:absolute;width:2px;height:100%;background:var(--green);}
+    .filter-battery{display:flex;flex-direction:column;gap:6px;}
+    .mini-bar{height:12px;background:#0b0d10;border:1px solid #20242a;border-radius:999px;overflow:hidden;position:relative;}
+    .mini-bar>i{display:block;height:100%;background:linear-gradient(90deg,#1a6030,#49b073);}
+    .mini-timeline{height:30px;border:1px solid #1b2026;border-radius:4px;position:relative;background:#0b0d10;}
+    .timeline-tick{position:absolute;width:2px;height:100%;background:var(--yellow);}
+    .env-block{display:flex;flex-direction:column;gap:6px;font-size:11px;}
+    .env-item{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1b2026;}
+    .env-item:last-child{border-bottom:none;}
+
+    .label{font-weight:600;letter-spacing:.06em}
+    .sub{color:var(--muted);font-size:12px}
+    .kv{display:grid;grid-template-columns:auto 1fr;gap:6px;font-size:12px;color:var(--muted)}
+
+    /* CRT + Glitch */
+    .crt:before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.04),rgba(0,0,0,0) 2px);background-size:100% 3px;mix-blend-mode:overlay;pointer-events:none}
+    .pulse-red{animation:pulseRed 1.2s infinite}
+    @keyframes pulseRed{0%,100%{box-shadow:0 0 0 0 rgba(255,90,99,.35)}50%{box-shadow:0 0 18px 2px rgba(255,90,99,.25)}}
+    .scanline{position:absolute;left:0;right:0;height:2px;background:rgba(255,255,255,.08);animation:scan 5s linear infinite}
+    @keyframes scan{0%{top:-2px}100%{top:100%}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>MUTHER-8800 :: PERSONNEL MONITOR</h1>
+    <small id="meta">MISSION: DEEP SURVEY // PHASE 2 :: SHIP WY-88</small>
+  </header>
+
+  <main>
+    <!-- LEFT: SQUAD LIST -->
+    <section class="card panel">
+      <h3 style="margin:0 0 8px 0;letter-spacing:.08em">SQUAD</h3>
+      <div class="squad-list" id="squadList"></div>
+    </section>
+
+    <!-- RIGHT: DETAIL VIEW -->
+    <section class="card panel detail-view" id="detailView">
+      <div style="text-align:center;color:var(--muted);padding:40px;">
+        SELECT PERSONNEL TO VIEW DETAILS
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>CREW ONLINE [4] :: AUTH LVL ≤ 3</div>
+    <div id="clock">MISSION CLOCK // --:--:--</div>
+  </footer>
+</div>
+
+<script>
+// ---------------------------
+//  PSEUDO-INTERACTIVE PERSONNEL MONITOR
+//  (No external data; sheet hooks later)
+// ---------------------------
+const state = {
+  selectedId: null,
+  personnel: [
+    {
+      id:'P-KOVAR',
+      name:'KOVÁR',
+      role:'TECH',
+      ship:'WY-88',
+      vitals:{hr:78,hrHistory:[],spo2:97,spo2History:[],temp:37.1,resp:16,respHistory:[],bp:'120/80',perfusion:85,lactate:12,bleedIndex:0},
+      health:92,
+      stress:23,
+      cognitiveLoad:45,
+      cognitiveHistory:[],
+      tremor:0.12,
+      mentalState:'FOCUSED',
+      injuries:[],
+      suit:{integrity:86,pressureInt:1013,pressureExt:1013,filterLoad:42,battery:73,batteryHours:3,batteryMinutes:14,pressureHistory:[],toxinHistory:[]},
+      environment:{o2:18.2,co2:0.12,toxinIndex:0.7,radiation:0.23,bioContacts:3,bioDistance:11,envStatus:'HABITABLE'}
+    },
+    {
+      id:'P-VANCE',
+      name:'VANCE',
+      role:'SECURITY',
+      ship:'WY-88',
+      vitals:{hr:95,hrHistory:[],spo2:94,spo2History:[],temp:37.8,resp:20,respHistory:[],bp:'135/90',perfusion:78,lactate:28,bleedIndex:2},
+      health:78,
+      stress:45,
+      cognitiveLoad:62,
+      cognitiveHistory:[],
+      tremor:0.34,
+      mentalState:'AGITATED',
+      injuries:['FRACTURED RIB','SHOCK RISK'],
+      suit:{integrity:72,pressureInt:1013,pressureExt:1013,filterLoad:58,battery:65,batteryHours:2,batteryMinutes:45,pressureHistory:[],toxinHistory:[]},
+      environment:{o2:18.2,co2:0.12,toxinIndex:0.7,radiation:0.23,bioContacts:3,bioDistance:11,envStatus:'HABITABLE'}
+    },
+    {
+      id:'P-CROSS',
+      name:'CROSS',
+      role:'MEDIC',
+      ship:'WY-88',
+      vitals:{hr:72,hrHistory:[],spo2:99,spo2History:[],temp:36.9,resp:14,respHistory:[],bp:'115/75',perfusion:92,lactate:8,bleedIndex:0},
+      health:98,
+      stress:15,
+      cognitiveLoad:38,
+      cognitiveHistory:[],
+      tremor:0.08,
+      mentalState:'FOCUSED',
+      injuries:[],
+      suit:{integrity:94,pressureInt:1013,pressureExt:1013,filterLoad:28,battery:88,batteryHours:4,batteryMinutes:12,pressureHistory:[],toxinHistory:[]},
+      environment:{o2:18.2,co2:0.12,toxinIndex:0.7,radiation:0.23,bioContacts:3,bioDistance:11,envStatus:'HABITABLE'}
+    },
+    {
+      id:'P-DRAKE',
+      name:'DRAKE',
+      role:'PILOT',
+      ship:'WY-88',
+      vitals:{hr:88,hrHistory:[],spo2:96,spo2History:[],temp:37.3,resp:18,respHistory:[],bp:'125/82',perfusion:81,lactate:18,bleedIndex:0},
+      health:85,
+      stress:32,
+      cognitiveLoad:55,
+      cognitiveHistory:[],
+      tremor:0.21,
+      mentalState:'FOCUSED',
+      injuries:[],
+      suit:{integrity:79,pressureInt:1013,pressureExt:1013,filterLoad:51,battery:71,batteryHours:3,batteryMinutes:8,pressureHistory:[],toxinHistory:[]},
+      environment:{o2:18.2,co2:0.12,toxinIndex:0.7,radiation:0.23,bioContacts:3,bioDistance:11,envStatus:'HABITABLE'}
+    }
+  ]
+};
+
+// Initialize history arrays
+state.personnel.forEach(p=>{
+  p.vitals.hrHistory = new Array(60).fill(p.vitals.hr).map((v,i)=>v+Math.sin(i/10)*5+Math.random()*3-1.5);
+  p.vitals.spo2History = new Array(60).fill(p.vitals.spo2).map((v,i)=>Math.max(85,Math.min(100,v+Math.random()*2-1)));
+  p.vitals.respHistory = new Array(60).fill(p.vitals.resp).map((v,i)=>v+Math.sin(i/8)*2+Math.random()*1-0.5);
+  p.cognitiveHistory = new Array(300).fill(p.cognitiveLoad).map((v,i)=>Math.max(0,Math.min(100,v+Math.random()*10-5)));
+  p.suit.pressureHistory = new Array(60).fill(p.suit.pressureInt);
+  p.suit.toxinHistory = new Array(60).fill(p.environment.toxinIndex);
+});
+
+// Utility
+const $ = (sel, root=document) => root.querySelector(sel);
+const el = (tag, props={},{children=[]}={})=>{
+  const n = Object.assign(document.createElement(tag), props);
+  [].concat(children).filter(Boolean).forEach(c=>n.append(c));
+  return n;
+};
+
+// Render Squad List
+function renderSquadList(){
+  const wrap = $('#squadList');
+  wrap.innerHTML = '';
+  state.personnel.forEach(p=>{
+    const card = el('div',{className:'person-card'+(state.selectedId===p.id?' selected':'')});
+    card.addEventListener('click',()=>selectPersonnel(p.id));
+
+    const portraitWrap = el('div',{className:'portrait-wrap'});
+    const stressClass = p.stress<26?'calm':(p.stress<61?'elevated':'panic');
+    const stressRing = el('div',{className:'stress-ring '+stressClass});
+    const portrait = el('div',{className:'portrait',textContent:p.name.charAt(0)});
+    portraitWrap.append(stressRing, portrait);
+
+    const personInfo = el('div',{className:'person-info'});
+    personInfo.append(
+      el('div',{className:'person-name',textContent:`${p.ship} // ${p.name} – ${p.role}`}),
+      el('div',{className:'person-role',textContent:`HR ${p.vitals.hr} bpm // SpO₂ ${p.vitals.spo2}% // ${p.vitals.temp}°C`})
+    );
+
+    const healthBar = el('div',{className:'health-bar'});
+    const healthColor = p.health>80?'green':(p.health>50?'yellow':(p.health>20?'red':'black'));
+    const healthFill = el('i',{className:healthColor,style:`width:${p.health}%;`});
+    healthBar.append(healthFill);
+
+    const envBand = el('div',{className:'env-band '+(p.environment.envStatus==='HABITABLE'?'safe':(p.environment.envStatus.includes('THIN')?'warning':'danger')),textContent:`ENV: ${p.environment.envStatus}`});
+
+    personInfo.append(healthBar, envBand);
+    card.append(portraitWrap, personInfo);
+    wrap.append(card);
+  });
+}
+
+// Select Personnel
+function selectPersonnel(id){
+  state.selectedId = id;
+  renderSquadList();
+  renderDetailView();
+}
+
+// Render Detail View
+function renderDetailView(){
+  const wrap = $('#detailView');
+  if (!state.selectedId){
+    wrap.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px;">SELECT PERSONNEL TO VIEW DETAILS</div>';
+    return;
+  }
+
+  const p = state.personnel.find(x=>x.id===state.selectedId);
+  if (!p) return;
+
+  wrap.innerHTML = '';
+
+  // Section 1: Vital & Injury Sensors
+  const vitalsSection = el('div',{className:'detail-section'});
+  vitalsSection.append(el('h3',{textContent:'VITAL & INJURY SENSORS'}));
+  
+  const vitalsGrid = el('div',{className:'vitals-grid'});
+  
+  const bioChannels = el('div',{className:'bio-channels'});
+  bioChannels.append(el('div',{style:'font-size:11px;color:var(--muted);margin-bottom:8px;',textContent:'BIO-METRIC CHANNELS'}));
+  
+  const hrChannel = createChannel('HR',`${p.vitals.hr} bpm`,'hrCanvas',p.vitals.hrHistory);
+  const respChannel = createChannel('RESP',`${p.vitals.resp} /min`,'respCanvas',p.vitals.respHistory);
+  const spo2Channel = createChannel('SpO₂',`${p.vitals.spo2}%`,'spo2Canvas',p.vitals.spo2History);
+  
+  bioChannels.append(hrChannel, respChannel, spo2Channel);
+  
+  const bodySilhouette = createBodySilhouette(p);
+  
+  vitalsGrid.append(bioChannels, bodySilhouette);
+  vitalsSection.append(vitalsGrid);
+  wrap.append(vitalsSection);
+
+  // Section 2: Cognitive / Panic Sensors
+  const cognitiveSection = el('div',{className:'detail-section'});
+  cognitiveSection.append(el('h3',{textContent:'COGNITIVE / PANIC SENSORS'}));
+  
+  const cognitiveGrid = el('div',{className:'cognitive-grid'});
+  
+  const stressGauge = createStressGauge(p);
+  const cognitiveTimeline = createCognitiveTimeline(p);
+  const tremorIndicator = createTremorIndicator(p);
+  
+  cognitiveGrid.append(stressGauge, cognitiveTimeline, tremorIndicator);
+  cognitiveSection.append(cognitiveGrid, el('div',{className:'mental-state',textContent:`MENTAL STATE: ${p.mentalState}`}));
+  wrap.append(cognitiveSection);
+
+  // Section 3: Suit, Environment & Proximity
+  const suitEnvSection = el('div',{className:'detail-section'});
+  suitEnvSection.append(el('h3',{textContent:'SUIT, ENVIRONMENT & PROXIMITY'}));
+  
+  const suitEnvGrid = el('div',{className:'suit-env-grid'});
+  
+  const suitPanel = createSuitPanel(p);
+  const envBlock = createEnvBlock(p);
+  
+  suitEnvGrid.append(suitPanel, envBlock);
+  suitEnvSection.append(suitEnvGrid);
+  wrap.append(suitEnvSection);
+
+  // Initialize canvas graphs
+  setTimeout(()=>{
+    initVitalsGraphs(p);
+    initCognitiveTimeline(p);
+  },10);
+}
+
+function createChannel(label, value, canvasId, history){
+  const channel = el('div',{className:'channel'});
+  channel.append(
+    el('div',{className:'channel-label',textContent:label}),
+    el('div',{className:'channel-value',textContent:value}),
+    el('canvas',{id:canvasId})
+  );
+  return channel;
+}
+
+function createBodySilhouette(p){
+  const bodyWrap = el('div',{className:'body-silhouette'});
+  const silhouetteContainer = el('div',{className:'silhouette'});
+  
+  const img = el('img',{src:'img/silohuette.png',alt:'Body silhouette'});
+  silhouetteContainer.append(img);
+  
+  // Add injury overlays based on injuries
+  const zones = [
+    {id:'head',injured:p.injuries.some(i=>i.includes('HEAD')||i.includes('CONCUSSION')),style:'top:0;left:25%;width:50%;height:18%;'},
+    {id:'torso',injured:p.injuries.some(i=>i.includes('RIB')||i.includes('TORSO')||i.includes('SHOCK')),style:'top:18%;left:20%;width:60%;height:35%;'},
+    {id:'larm',injured:p.injuries.some(i=>i.includes('ARM')),style:'top:20%;left:0;width:20%;height:30%;'},
+    {id:'rarm',injured:p.injuries.some(i=>i.includes('ARM')),style:'top:20%;right:0;width:20%;height:30%;'},
+    {id:'lleg',injured:p.injuries.some(i=>i.includes('LEG')),style:'bottom:0;left:30%;width:15%;height:30%;'},
+    {id:'rleg',injured:p.injuries.some(i=>i.includes('LEG')),style:'bottom:0;right:30%;width:15%;height:30%;'}
+  ];
+  
+  zones.forEach(z=>{
+    if (z.injured){
+      const overlay = el('div',{className:'body-zone-overlay',style:z.style});
+      silhouetteContainer.append(overlay);
+    }
+  });
+  
+  bodyWrap.append(silhouetteContainer);
+  
+  if (p.injuries.length>0){
+    const tags = el('div',{className:'status-tags'});
+    p.injuries.forEach(inj=>{
+      tags.append(el('div',{className:'status-tag',textContent:inj}));
+    });
+    bodyWrap.append(tags);
+  }
+  
+  return bodyWrap;
+}
+
+function createStressGauge(p){
+  const gaugeWrap = el('div',{className:'stress-gauge'});
+  const gaugeBar = el('div',{className:'gauge-bar'});
+  const gaugeFill = el('div',{className:'gauge-fill',style:`height:${p.stress}%;`});
+  const gaugeBands = el('div',{className:'gauge-bands'});
+  gaugeBands.append(
+    el('div',{textContent:'CRITICAL'}),
+    el('div',{textContent:'UNSTABLE'}),
+    el('div',{textContent:'ELEVATED'}),
+    el('div',{textContent:'STABLE'})
+  );
+  gaugeBar.append(gaugeFill, gaugeBands);
+  gaugeWrap.append(gaugeBar, el('div',{className:'gauge-label',textContent:'STRESS LOAD'}));
+  return gaugeWrap;
+}
+
+function createCognitiveTimeline(p){
+  const timeline = el('div',{className:'cognitive-timeline'});
+  timeline.append(el('canvas',{id:'cognitiveCanvas'}));
+  return timeline;
+}
+
+function createTremorIndicator(p){
+  const tremorWrap = el('div',{className:'tremor-indicator'});
+  tremorWrap.append(
+    el('div',{className:'tremor-value',textContent:p.tremor.toFixed(2)}),
+    el('div',{className:'tremor-icon',textContent:'✋',style:p.tremor>0.2?'animation:tremor 0.1s infinite;':''})
+  );
+  return tremorWrap;
+}
+
+function createSuitPanel(p){
+  const panel = el('div',{className:'suit-panel'});
+  
+  const integrityRing = el('div',{className:'integrity-ring','data-value':`${p.suit.integrity}%`});
+  const integrityColor = p.suit.integrity>80?'#58d38c':(p.suit.integrity>60?'#f0c44c':'#ff5a63');
+  integrityRing.style.borderColor = integrityColor;
+  
+  const pressureBar = el('div',{className:'pressure-bar'});
+  pressureBar.append(
+    el('div',{textContent:'INT'}),
+    el('div',{className:'pressure-markers'}, {children:[
+      el('div',{className:'pressure-int',style:`left:${(p.suit.pressureInt/1500)*100}%;`}),
+      el('div',{className:'pressure-ext',style:`left:${(p.suit.pressureExt/1500)*100}%;background:var(--yellow);`})
+    ]}),
+    el('div',{textContent:'EXT'})
+  );
+  
+  const filterBattery = el('div',{className:'filter-battery'});
+  const filterBar = el('div',{className:'mini-bar'});
+  filterBar.append(el('i',{style:`width:${p.suit.filterLoad}%;`}));
+  filterBattery.append(
+    el('div',{style:'font-size:10px;margin-bottom:4px;',textContent:`FILTER LOAD ${p.suit.filterLoad}%`}),
+    filterBar,
+    el('div',{style:'font-size:10px;margin-top:8px;margin-bottom:4px;',textContent:`POWER PACK ${p.suit.battery}% (${p.suit.batteryHours}h ${p.suit.batteryMinutes}m est.)`}),
+    (function(){
+      const batBar = el('div',{className:'mini-bar'});
+      batBar.append(el('i',{style:`width:${p.suit.battery}%;`}));
+      return batBar;
+    })()
+  );
+  
+  const miniTimeline = el('div',{className:'mini-timeline'});
+  // Add some timeline ticks
+  for(let i=0;i<10;i++){
+    const tickColor = Math.random()>0.7?'#ff5a63':'#f0c44c';
+    const tick = el('div',{className:'timeline-tick',style:`left:${i*10}%;background:${tickColor};`});
+    miniTimeline.append(tick);
+  }
+  
+  panel.append(
+    integrityRing,
+    pressureBar,
+    filterBattery,
+    miniTimeline
+  );
+  
+  return panel;
+}
+
+function createEnvBlock(p){
+  const envBlock = el('div',{className:'env-block'});
+  envBlock.append(
+      el('div',{className:'env-item'}, {children:[el('span',{textContent:'ATM O₂:'}),el('span',{textContent:`${p.environment.o2}%`,style:`color:${p.environment.o2>18?'#58d38c':'#f0c44c'};`})]}),
+    el('div',{className:'env-item'}, {children:[el('span',{textContent:'CO₂:'}),el('span',{textContent:`${p.environment.co2}%`})]}),
+    el('div',{className:'env-item'}, {children:[el('span',{textContent:'TOXIN INDEX:'}),el('span',{textContent:`${p.environment.toxinIndex} (${p.environment.toxinIndex<0.5?'SAFE':p.environment.toxinIndex<1?'MODERATE':'HIGH'})`})]}),
+    el('div',{className:'env-item'}, {children:[el('span',{textContent:'RADIATION:'}),el('span',{textContent:`${p.environment.radiation} mSv/h (${p.environment.radiation<0.5?'SAFE':'WARNING'})`})]}),
+    el('div',{className:'env-item'}, {children:[el('span',{textContent:'BIO SIGNATURE:'}),el('span',{textContent:`${p.environment.bioContacts} CONTACTS // ${p.environment.bioDistance}m`})]})
+  );
+  return envBlock;
+}
+
+// Canvas graph initialization
+function initVitalsGraphs(p){
+  const hrCanvas = $('#hrCanvas');
+  const respCanvas = $('#respCanvas');
+  const spo2Canvas = $('#spo2Canvas');
+  
+  // Graphs use the history arrays - the rightmost point matches the displayed number
+  // because tickUpdates() pushes the current value to history before rendering
+  if (hrCanvas) drawVitalGraph(hrCanvas, p.vitals.hrHistory, '#58d38c', 40, 120);
+  if (respCanvas) drawVitalGraph(respCanvas, p.vitals.respHistory, '#4dd0e1', 8, 24);
+  if (spo2Canvas) drawVitalGraph(spo2Canvas, p.vitals.spo2History, '#f0c44c', 85, 100);
+}
+
+function drawVitalGraph(canvas, data, color, min, max){
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width*dpr;
+  canvas.height = rect.height*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  
+  ctx.clearRect(0,0,rect.width,rect.height);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  
+  const w = rect.width, h = rect.height;
+  const range = max - min;
+  
+  for (let i=0;i<data.length;i++){
+    const x = i*(w/(data.length-1));
+    const y = h - ((data[i]-min)/range)*h;
+    if (i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  }
+  
+  ctx.stroke();
+}
+
+function initCognitiveTimeline(p){
+  const canvas = $('#cognitiveCanvas');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width*dpr;
+  canvas.height = rect.height*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  
+  ctx.clearRect(0,0,rect.width,rect.height);
+  ctx.strokeStyle = '#f0c44c';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  
+  const w = rect.width, h = rect.height;
+  const data = p.cognitiveHistory.slice(-60); // Last 60 data points
+  
+  for (let i=0;i<data.length;i++){
+    const x = i*(w/(data.length-1));
+    const y = h - (data[i]/100)*h;
+    if (i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  }
+  
+  ctx.stroke();
+}
+
+// Real-time updates
+function tickUpdates(){
+  state.personnel.forEach(p=>{
+    // Update vitals
+    const hrChange = (Math.random()-0.5)*2;
+    p.vitals.hr = Math.max(50, Math.min(150, p.vitals.hr + hrChange));
+    p.vitals.hrHistory.push(p.vitals.hr);
+    p.vitals.hrHistory.shift();
+    
+    p.vitals.spo2 = Math.max(85, Math.min(100, p.vitals.spo2 + (Math.random()-0.5)*0.5));
+    p.vitals.spo2History.push(p.vitals.spo2);
+    p.vitals.spo2History.shift();
+    
+    p.vitals.resp = Math.max(10, Math.min(30, p.vitals.resp + (Math.random()-0.5)*0.3));
+    p.vitals.respHistory.push(p.vitals.resp);
+    p.vitals.respHistory.shift();
+    
+    // Update cognitive load
+    p.cognitiveLoad = Math.max(0, Math.min(100, p.cognitiveLoad + (Math.random()-0.5)*2));
+    p.cognitiveHistory.push(p.cognitiveLoad);
+    p.cognitiveHistory.shift();
+    
+    // Update stress (gradual increase)
+    if (Math.random()>0.95) p.stress = Math.min(100, p.stress + Math.random()*2);
+    
+    // Update health based on vitals
+    if (p.vitals.spo2<90 || p.vitals.hr>130) p.health = Math.max(0, p.health - 0.1);
+    
+    // Update mental state based on stress
+    if (p.stress<26) p.mentalState = 'FOCUSED';
+    else if (p.stress<61) p.mentalState = 'AGITATED';
+    else p.mentalState = 'DISSOCIATIVE';
+  });
+  
+  renderSquadList();
+  if (state.selectedId) {
+    renderDetailView();
+  }
+}
+
+// Clock
+function tickClock(){ $('#clock').textContent = 'MISSION CLOCK // '+new Date().toLocaleString([], {hour12:false}); }
+
+// Boot
+function boot(){
+  renderSquadList();
+  tickClock();
+  setInterval(tickUpdates, 2000);
+  setInterval(tickClock, 1000);
+}
+
+window.addEventListener('resize', ()=>{
+  if (state.selectedId) {
+    const p = state.personnel.find(x=>x.id===state.selectedId);
+    if (p) {
+      setTimeout(()=>{
+        initVitalsGraphs(p);
+        initCognitiveTimeline(p);
+      }, 100);
+    }
+  }
+});
+
+boot();
+</script>
+</body>
+</html>
+

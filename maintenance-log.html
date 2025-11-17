@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAINTENANCE LOG :: MONTERO-SCRUBBER-02 ::</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configure Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Orbitron', 'sans-serif'],
+                        'mono': ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        'primary-yellow': '#fcee0a',
+                    },
+                    borderRadius: {
+                        'none': '0',
+                        'sm': '0',
+                        'md': '0',
+                        'lg': '0',
+                        'xl': '0',
+                        '2xl': '0',
+                        '3xl': '0',
+                        'full': '0',
+                    },
+                    boxShadow: {
+                        'glow-yellow': '0 0 15px rgba(250, 204, 21, 0.5), 0 0 3px rgba(250, 204, 21, 0.8)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Load Google Fonts (Orbitron for headers, Share Tech Mono for body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom styles to match the Mothership aesthetic */
+        body {
+            /* A subtle scanline effect */
+            background: #050505 repeating-linear-gradient(
+                0deg,
+                rgba(250, 204, 21, 0.05) 1px,
+                transparent 1px 3px
+            );
+            /* Set the default font-family */
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* Custom styles for the table */
+        th, td {
+            border: 1px solid #404040;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #171717;
+        }
+        tr:nth-child(even) {
+            background-color: #0000004d;
+        }
+    </style>
+</head>
+<body class="bg-black text-neutral-300 min-h-screen p-4 md:p-8">
+
+    <!-- Main Log Container -->
+    <div class="max-w-6xl mx-auto border-2 border-primary-yellow bg-neutral-950 shadow-glow-yellow">
+        
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b-2 border-primary-yellow">
+            <div>
+                <h1 class="font-sans text-2xl md:text-4xl text-primary-yellow uppercase tracking-widest">
+                    Maintenance Log
+                </h1>
+                <p class="text-neutral-400">COMPONENT: AIR SCRUBBER 02 // DECK C (SCIENCE)</p>
+            </div>
+            <div class="text-left md:text-right mt-2 md:mt-0">
+                <span class="block text-xl font-sans text-red-500 font-bold animate-pulse">
+                    :: STATUS: FAILURE IMMINENT ::
+                </span>
+                <span class="text-sm text-neutral-500">AUTO-LOGGING ACTIVE</span>
+            </div>
+        </header>
+
+        <!-- STATUS INFO -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border-b-2 border-neutral-700 bg-black/40">
+            <div>
+                <label class="block text-xs uppercase text-neutral-500">Component ID</label>
+                <span class="text-lg">WY-SCRUB-02C-8800</span>
+            </div>
+            <div>
+                <label class="block text-xs uppercase text-neutral-500">Last Serviced (Manual)</label>
+                <span class="text-lg text-yellow-400">2279.08.13</span>
+            </div>
+            <div>
+                <label class="block text-xs uppercase text-neutral-500">Assigned Technician</label>
+                <span class="text-lg">C. HAAS (755-A)</span>
+            </div>
+        </section>
+
+        <!-- LOG BODY -->
+        <main class="p-6 md:p-8">
+            
+            <!-- Log Table -->
+            <div>
+                <h2 class="font-sans text-xl text-primary-yellow uppercase tracking-wider mb-3">:: Event Log ::</h2>
+                <div class="font-mono text-base bg-black/50 border border-neutral-700 overflow-y-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="w-1/4 font-sans text-primary-yellow uppercase">Timestamp</th>
+                                <th class="w-1/6 font-sans text-primary-yellow uppercase">Tech ID</th>
+                                <th class="w-1/2 font-sans text-primary-yellow uppercase">Log Entry</th>
+                                <th class="w-1/6 font-sans text-primary-yellow uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2279.08.09 // 14:30</td>
+                                <td>755-A</td>
+                                <td>Routine service. Primary filter replaced.</td>
+                                <td class="text-green-400">NOMINAL</td>
+                            </tr>
+                            <tr>
+                                <td>2279.08.11 // 09:15</td>
+                                <td>755-A</td>
+                                <td>CO2 levels spiking 8%. Cleaned secondary filter. Levels normalizing.</td>
+                                <td class="text-green-400">NOMINAL</td>
+                            </tr>
+                            <tr>
+                                <td>2279.08.12 // 21:05</td>
+                                <td>755-A</td>
+                                <td>Reports of "odd smell" from science lab. Vents check clean.</td>
+                                <td class="text-green-400">NOMINAL</td>
+                            </tr>
+                            <tr>
+                                <td>2279.08.13 // 04:12</td>
+                                <td>755-A</td>
+                                <td class="text-yellow-400">Pressure fluctuation alarm. Found <span class="bg-neutral-800 p-1">unidentified organic biomass</span> in primary filter. Sampled. Cleaned.</td>
+                                <td class="text-yellow-400">WARNING</td>
+                            </tr>
+                            <tr>
+                                <td>2279.08.13 // 18:00</td>
+                                <td>M.U.T.H.R.</td>
+                                <td>Automatic purge cycle initiated. [ERR: CYCLE FAILED 0x88]</td>
+                                <td class="text-yellow-400">WARNING</td>
+                            </tr>
+                            <tr>
+                                <td>2279.08.13 // 18:05</td>
+                                <td>M.U.T.H.R.</td>
+                                <td>Automatic purge cycle initiated. [ERR: CYCLE FAILED 0x88]</td>
+                                <td class="text-yellow-400">WARNING</td>
+                            </tr>
+                            <tr>
+                                <td>2279.08.14 // 01:50</td>
+                                <td>755-A</td>
+                                <td class="text-red-500">Filter is... clogged. It's solid. Can't clear it. Trying manual override. Smells like... god, it smells awful.</td>
+                                <td class="text-red-500">CRITICAL</td>
+                            </tr>
+                             <tr>
+                                <td>2279.08.14 // 02:30</td>
+                                <td>M.U.T.H.R.</td>
+                                <td class="text-red-500">AIR QUALITY DECK C: 40% [UNSAFE]. ALL VENTS SEALED.</td>
+                                <td class="text-red-500">CRITICAL</td>
+                            </tr>
+                            <tr>
+                                <td>2279.08.14 // 02:32</td>
+                                <td>M.U.T.H.R.</td>
+                                <td>Life signs (HAAS, C.) not detected.</td>
+                                <td class="text-red-500">CRITICAL</td>
+                            </tr>
+                            <tr>
+                                <td>2279.08.14 // 03:00</td>
+                                <td>M.U.T.H.R.</td>
+                                <td class="text-yellow-400">[...automatic logging... system pressure fluctuating... integrity failing...]</td>
+                                <td class="text-red-500">FAILURE</td>
+                            </tr>
+                             <tr>
+                                <td colspan="4" class="text-center text-neutral-600 p-4">
+                                    [...CONNECTION TO COMPONENT LOST...]
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        
+
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/maintenance-log.js"></script>
+
+</body>
+</html>

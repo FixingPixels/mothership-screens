@@ -1,0 +1,43 @@
+/* Custom styles to match the Mothership aesthetic */
+body {
+    /* A subtle scanline effect */
+    background: #050505 repeating-linear-gradient(
+        0deg,
+        rgba(250, 204, 21, 0.05) 1px,
+        transparent 1px 3px
+    );
+    /* Set the default font-family */
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* Custom styles for the table */
+th, td {
+    border: 1px solid #404040; /* neutral-700 */
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+th {
+    background-color: #171717; /* neutral-900 */
+}
+/* Hover effect for file rows */
+.clickable-row:hover {
+    background-color: #fcee0a; /* primary-yellow */
+    color: #050505; /* black */
+    cursor: pointer;
+}
+.clickable-row:hover .icon-path {
+    stroke: #050505; /* black */
+}
+.clickable-row:hover .text-red-500 {
+    color: #b91c1c; /* red-700 */
+}
+.clickable-row:hover .text-neutral-500 {
+    color: #404040; /* neutral-700 */
+}
+
+/* Style for non-clickable rows on hover */
+tbody tr:not(.clickable-row):hover {
+    background-color: #262626; /* neutral-800 */
+}
+

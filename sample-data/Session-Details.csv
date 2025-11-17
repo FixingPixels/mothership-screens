@@ -1,0 +1,10 @@
+order,type,text,delay,underline
+1,linebreak,,,
+2,line,"SESSION DETAILS",,TRUE
+3,linebreak,,,
+4,line,"Session Date: Sunday October 19, 2025",,
+5,line,"Session Time: 1100 hours",,
+6,line,"Location: 7 Ash Ln, Dudley, MA 01571",,
+7,line,"Remote Operator Interface: <a href=""https://us02web.zoom.us/j/89616716936?pwd=fpGC5kxai7D9ZamJHzhC9apsCxPzgF.1"" target=""_blank"">Zoom Link</a>",,
+8,linebreak,,,
+

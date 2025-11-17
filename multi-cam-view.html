@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MOTHERSHIP // CAMERA MATRIX</title>
+<style>
+  :root{
+    --bg:#050607; --ink:#c6d1d8; --hud:#9ce6ff; --amber:#ffde8a; --red:#ff4d4d; --green:#98ff9a;
+    --panel:#0a1116; --panel2:#081017; --edge:#102733; --edge2:#0f2230;
+  }
+  html,body{height:100%}
+  body{margin:0; background:#000; color:var(--ink); font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New"; overflow:hidden}
+
+  .frame{position:fixed; inset:0; display:grid; place-items:center}
+  .crt{position:relative; width:min(1280px,96vw); height:min(760px,88vh); background:var(--bg); border-radius:12px; overflow:hidden; box-shadow:0 0 0 1px #0b1b21, 0 10px 60px #00e5ff12}
+  .grain{position:absolute; inset:0; pointer-events:none; background:radial-gradient(100% 80% at 50% 50%, transparent 40%, rgba(0,0,0,.52) 80%, rgba(0,0,0,.92) 100%)}
+  .scan{position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, transparent 1px 3px); mix-blend-mode:soft-light; opacity:.18; animation:roll 7s linear infinite}
+  @keyframes roll{from{transform:translateY(-1%)}to{transform:translateY(1%)}}
+
+  .top{position:absolute; inset:0 0 auto 0; height:52px; display:flex; align-items:center; gap:18px; padding:0 18px; background:#070b0f; border-bottom:1px solid #0e1e26; letter-spacing:.08em}
+  .badge{font-weight:700; color:#041015; background:linear-gradient(180deg, #9ce6ff, #6be9ff); padding:6px 10px; border-radius:3px; box-shadow:inset 0 -2px 0 #48cde0}
+  .id{opacity:.85}
+  .clock{margin-left:auto; color:#9ce6ff}
+
+  .grid{position:absolute; top:52px; bottom:56px; left:0; right:0; display:grid; grid-template-columns: 300px 1fr;}
+
+  /* Camera list */
+  .list{background:linear-gradient(180deg,var(--panel),var(--panel2)); border-right:1px solid var(--edge); padding:14px 10px; overflow:auto}
+  .section{font-size:11px; letter-spacing:.2em; color:#8edfff; opacity:.9; margin:6px 8px 10px}
+  .cam{display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; padding:10px; margin:6px 0; border:1px solid var(--edge2); background:#07131b; border-radius:6px; cursor:pointer; transition:background .15s}
+  .cam:hover{background:#0b1e29}
+  .cam.active{outline:2px solid #39e1ff}
+  .cam .dot{width:8px; height:8px; border-radius:50%}
+  .ok{background:linear-gradient(#1eea82,#0bc45f)}
+  .warn{background:linear-gradient(#ffd36f,#ffb941)}
+  .err{background:linear-gradient(#ff6a6a,#ff3838)}
+  .loc{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .dist{font-size:11px; opacity:.7}
+
+  /* Viewport */
+  .viewport{position:relative; background:#030a10;}
+  .view-head{display:flex; align-items:center; gap:16px; padding:10px 14px; border-bottom:1px solid var(--edge); background:#081117; color:#9ce6ff}
+  .view-head .label{font-size:12px; letter-spacing:.16em}
+  .view-head .state{margin-left:auto; font-size:12px; letter-spacing:.12em}
+  .view{position:absolute; inset:52px 0 0 0; overflow:hidden; background:#030b12;} /* Added overflow:hidden and bg */
+
+  .hud{position:absolute; inset:auto 14px 14px auto; display:flex; gap:10px; align-items:center; color:#9ce6ff; background:#081117aa; border:1px solid var(--edge); padding:6px 10px; border-radius:6px; backdrop-filter:blur(2px)}
+  .btn{border:1px solid var(--edge2); background:#0a1a22; color:#bfefff; padding:6px 10px; border-radius:4px; cursor:pointer}
+  .btn:hover{background:#0f2430}
+
+  /* NEW: Style for the image and video */
+  .view img.pan,
+  .view video.pan {
+    width: 180%; /* Make image/video wider than viewport */
+    height: 100%;
+    object-fit: cover; /* Fill height, clip width (like 'slice') */
+    image-rendering: pixelated; /* Optional: good for pixel-art placeholders */
+  }
+  
+  /* Ensure videos that aren't panning fill the viewport */
+  .view video:not(.pan) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .view img:not(.pan) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Ensure video elements are displayed properly */
+  .view video {
+    display: block;
+    background: #000;
+  }
+
+  /* Lost signal container */
+  .view .lost-signal-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Lost signal canvas styling */
+  .view canvas.lost-signal-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: #0b0b0d;
+    image-rendering: pixelated;
+    filter: contrast(110%) brightness(105%);
+  }
+
+  /* Lost signal text overlay */
+  .lost-signal-text {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .lost-signal-text span {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: #e9eaef;
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    opacity: 0.9;
+    animation: textFlicker 3s infinite, textGlitch 4s infinite;
+  }
+
+  @keyframes textFlicker {
+    0%, 9% { opacity: 0.88 }
+    10% { opacity: 0.5 }
+    11% { opacity: 0.92 }
+    30% { opacity: 0.85 }
+    31% { opacity: 0.95 }
+    70% { opacity: 0.8 }
+    71% { opacity: 1 }
+    90% { opacity: 0.83 }
+    91%, 100% { opacity: 0.95 }
+  }
+
+  @keyframes textGlitch {
+    0%, 5%, 100% { transform: translate(0, 0); }
+    6% { transform: translate(2px, -1px); }
+    7% { transform: translate(-3px, 1px); }
+    9% { transform: translate(1px, 0); }
+    50% { transform: translate(-0.8px, 0.6px); }
+    70% { transform: translate(0.5px, -0.3px); }
+  }
+
+  /* Pan animation - uses transform like the SVG version */
+  .pan{animation: pan 7s ease-in-out infinite alternate}
+  @keyframes pan{
+    0%{ transform: translateX(0) } /* Start at left edge */
+    100%{ transform: translateX(-44.44%) } /* Pan to show right edge (80% total width / 180% image width = 44.44%) */
+  }
+
+  /* Glitch overlay */
+  .glitch{position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:0;}
+  .glitch.show{animation:g 900ms steps(2)}
+  @keyframes g{0%,100%{opacity:0} 30%{opacity:.5}}
+
+  /* Accessibility: This rule disables animation if the user has 'Reduce Motion' enabled in their OS. */
+  @media (prefers-reduced-motion:reduce){ .scan{animation:none} .pan{animation:none} }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="crt" aria-label="MOTHERSHIP // CAMERA MATRIX">
+    <div class="grain"></div>
+    <div class="scan"></div>
+    <div class="top">
+      <div class="badge">CAMSYS</div>
+      <div class="id">GRETA BASE / NODE: CAM-MATRIX-02</div>
+      <div class="clock" id="clock">--:--:--</div>
+    </div>
+
+    <div class="grid">
+      <aside class="list" id="list">
+        <!-- Camera list will be dynamically loaded here -->
+        <div class="text-center text-neutral-400 p-4">Loading cameras...</div>
+      </aside>
+
+      <main class="viewport">
+        <div class="view-head">
+          <div class="label" id="label">—</div>
+          <div class="state" id="state">—</div>
+          <button class="btn" id="togglePan">PAUSE PAN</button>
+        </div>
+        <div class="view" id="view" role="img" aria-label="Selected camera feed"></div>
+        <div class="hud" id="hud"></div>
+        <div class="glitch" id="glitch"></div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script src="js/multi-cam-view.js"></script>
+</body>
+</html>
+
+
+

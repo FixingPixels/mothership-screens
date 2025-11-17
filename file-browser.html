@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FILE DIRECTORY :: MUTHER-8800 :: DECK_C</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts (Orbitron for headers, Share Tech Mono for body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/file-browser.css">
+    
+    <script>
+        /* Configure Tailwind to use our custom fonts */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        /* 'sans' will be used for headers */
+                        'sans': ['Orbitron', 'sans-serif'],
+                        /* 'mono' will be used for body text */
+                        'mono': ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        /* A specific, harsh yellow for the "Mothership" feel */
+                        'primary-yellow': '#fcee0a',
+                    },
+                    /* No rounded corners. Ever. */
+                    borderRadius: {
+                        'none': '0',
+                        'sm': '0',
+                        'md': '0',
+                        'lg': '0',
+                        'xl': '0',
+                        '2xl': '0',
+                        '3xl': '0',
+                        'full': '0',
+                    },
+                    /* A glow effect for the main border */
+                    boxShadow: {
+                        'glow-yellow': '0 0 15px rgba(250, 204, 21, 0.5), 0 0 3px rgba(250, 204, 21, 0.8)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-black text-neutral-300 min-h-screen p-4 md:p-8">
+
+    <!-- Main Directory View Container -->
+    <div id="directory-view">
+        <div class="max-w-6xl mx-auto border-2 border-primary-yellow bg-neutral-950 shadow-glow-yellow">
+            
+            <!-- HEADER -->
+            <header class="p-4 border-b-2 border-primary-yellow">
+                <h1 id="page-title" class="font-sans text-2xl md:text-4xl text-primary-yellow uppercase tracking-widest">
+                    File Directory
+                </h1>
+                <p class="text-neutral-400 text-lg">
+                    PATH: //SYSROOT/RESEARCH/PERSONNEL/EDAM
+                </p>
+            </header>
+
+            <!-- FILE LIST -->
+            <main class="p-6 md:p-8">
+                <div class="font-mono text-base bg-black/50 border border-neutral-700 h-96 overflow-y-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="w-1/12 font-sans text-primary-yellow uppercase">Type</th>
+                                <th class="w-4/12 font-sans text-primary-yellow uppercase">Filename</th>
+                                <th class="w-2/12 font-sans text-primary-yellow uppercase">Size</th>
+                                <th class="w-2/12 font-sans text-primary-yellow uppercase">Modified</th>
+                                <th class="w-3/12 font-sans text-primary-yellow uppercase">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="directory-table-body">
+                            <!-- Directory rows will be dynamically loaded here -->
+                            <tr id="loading-row">
+                                <td colspan="5" class="text-center text-neutral-500 py-8">
+                                    <div class="inline-block">Loading directory...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+
+            <!-- FOOTER ACTIONS -->
+            <footer class="flex flex-col md:flex-row justify-between items-center gap-3 p-4 border-t-2 border-neutral-700 bg-black/30">
+                <div id="footer-stats" class="text-neutral-500">
+                    7 File(s), 3 Dir(s) // 8929.6 KB TOTAL // [2.1 TB FREE]
+                </div>
+                
+            </footer>
+
+        </div>
+    </div>
+    <!-- END Directory View -->
+
+    <!-- File Content Views Container -->
+    <!-- File content views will be dynamically generated here -->
+    <div id="file-content-container"></div>
+    <!-- END File Content Views Container -->
+
+    <!-- JavaScript -->
+    <script src="js/file-browser.js"></script>
+
+</body>
+</html>

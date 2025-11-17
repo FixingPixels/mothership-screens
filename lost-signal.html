@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signal Lost — Animated</title>
+    <style>
+        :root {
+            --bg: #0b0b0d;
+            --fg: #e9eaef;
+            --scanline-opacity: 0.08;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            overflow: hidden;
+        }
+
+        /* Container */
+        .tv {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(ellipse at center, #161618 0%, #0b0b0d 60%, #000 100%);
+            isolation: isolate;
+        }
+
+        /* Static canvas sits underneath */
+        canvas#noise {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            /* chunky noise upscale */
+            filter: contrast(110%) brightness(105%);
+            z-index: 0;
+        }
+
+        /* Horizontal scanlines */
+        .scanlines {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background: repeating-linear-gradient(to bottom,
+                    rgba(255, 255, 255, var(--scanline-opacity)) 0px,
+                    rgba(255, 255, 255, var(--scanline-opacity)) 1px,
+                    rgba(0, 0, 0, 0) 2px,
+                    rgba(0, 0, 0, 0) 4px);
+            mix-blend-mode: overlay;
+            pointer-events: none;
+        }
+
+        /* Rolling brighter band */
+        .roll {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0) 40%,
+                    rgba(255, 255, 255, 0.15) 50%,
+                    rgba(255, 255, 255, 0) 60%,
+                    rgba(255, 255, 255, 0) 100%);
+            animation: roll 3.8s linear infinite;
+            mix-blend-mode: screen;
+        }
+
+        @keyframes roll {
+            to {
+                transform: translateY(100%);
+            }
+        }
+
+        /* Subtle vignette */
+        .vignette {
+            position: absolute;
+            inset: -2vmin;
+            z-index: 3;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%);
+        }
+
+        /* Text */
+        $1 white-space: nowrap;
+        }
+
+        /* Chromatic aberration layers */
+        .title::before,
+        .title::after {
+            color: #39a0ff;
+            transform: translate(0.4px, 0.1px);
+            mix-blend-mode: screen;
+        }
+
+        .title::before {
+            color: #ff395e;
+            transform: translate(-0.4px, -0.1px);
+            mix-blend-mode: screen;
+        }
+
+        .title::after {
+            color: #39a0ff;
+            transform: translate(0.8px, 0.2px);
+            mix-blend-mode: screen;
+        }
+
+        @keyframes glitchShift {
+
+            0%,
+            5%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            6% {
+                transform: translate(2px, -1px);
+            }
+
+            7% {
+                transform: translate(-3px, 1px);
+            }
+
+            9% {
+                transform: translate(1px, 0);
+            }
+
+            50% {
+                transform: translate(-0.8px, 0.6px);
+            }
+
+            70% {
+                transform: translate(0.5px, -0.3px);
+            }
+        }
+
+        /* Small slice jitter effect */
+        .title span {
+            position: relative;
+            display: inline-block;
+            padding: 0 0.04em;
+            animation: jitter 2.5s infinite;
+        }
+
+        @keyframes jitter {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            12% {
+                transform: translateY(-0.3px);
+            }
+
+            13% {
+                transform: translateY(0.3px);
+            }
+
+            32% {
+                transform: translateY(-0.25px);
+            }
+
+            33% {
+                transform: translateY(0.25px);
+            }
+
+            72% {
+                transform: translateY(-0.35px);
+            }
+        }
+
+        10% {
+            transform: translateY(-0.5px);
+        }
+
+        11% {
+            transform: translateY(0.6px);
+        }
+
+        30% {
+            transform: translateY(-0.4px);
+        }
+
+        31% {
+            transform: translateY(0.5px);
+        }
+
+        70% {
+            transform: translateY(-0.6px);
+        }
+        }
+
+        @keyframes textFlicker {
+
+            0%,
+            9% {
+                opacity: 0.88
+            }
+
+            10% {
+                opacity: 0.5
+            }
+
+            11% {
+                opacity: 0.92
+            }
+
+            30% {
+                opacity: 0.85
+            }
+
+            31% {
+                opacity: 0.95
+            }
+
+            70% {
+                opacity: 0.8
+            }
+
+            71% {
+                opacity: 1
+            }
+
+            90% {
+                opacity: 0.83
+            }
+
+            91%,
+            100% {
+                opacity: 0.95
+            }
+        }
+
+        /* Occasional full-screen glitch bars */
+        .bars {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bar {
+            position: absolute;
+            left: -10%;
+            width: 120%;
+            height: 8px;
+            opacity: 0;
+            background: linear-gradient(90deg, #fff, #999 60%, #fff);
+            filter: blur(0.6px);
+            mix-blend-mode: screen;
+            animation: barMove 6s infinite;
+        }
+
+        @keyframes barMove {
+
+            0%,
+            78%,
+            100% {
+                transform: translateY(-20%);
+                opacity: 0;
+            }
+
+            80% {
+                transform: translateY(20%);
+                opacity: 0.12;
+            }
+
+            82% {
+                transform: translateY(80%);
+                opacity: 0.16;
+            }
+
+            84% {
+                transform: translateY(130%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="tv">
+        <canvas id="noise"></canvas>
+        <div class="roll"></div>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+        <h1 class="title" id="title" aria-label="Signal Lost" data-text="SIGNAL LOST"></h1>
+        <div class="bars">
+            <div class="bar" style="top:18%"></div>
+            <div class="bar" style="top:42%"></div>
+            <div class="bar" style="top:76%"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== Utility: split title into spans for subtle jitter =====
+        const title = document.getElementById('title');
+        const text = (title.dataset.text || 'SIGNAL LOST').toUpperCase();
+        title.innerHTML = [...text].map(ch => `<span>${ch === ' ' ? '&nbsp;' : ch}</span>`).join('');
+
+        // ===== Static Noise Renderer =====
+        const canvas = document.getElementById('noise');
+        const ctx = canvas.getContext('2d');
+
+        // Render low-res noise and upscale for performance
+        let w, h, smallW, smallH, buffer, data;
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+            // Low-res base, then scale up for CRT feel
+            const scale = 0.28; // higher = finer grain
+            smallW = Math.max(64, Math.floor(w * scale));
+            smallH = Math.max(64, Math.floor(h * scale));
+            buffer = ctx.createImageData(smallW, smallH);
+            data = buffer.data;
+        }
+        window.addEventListener('resize', resize, { passive: true });
+        resize();
+
+        // Noise parameters
+        const fps = 24; // cinematic cadence
+        const frameInterval = 1000 / fps;
+        let last = 0, t = 0;
+
+        // persistent buffer for smoother, film-like grain (temporal blending)
+        let prev; // Uint8ClampedArray
+
+        function drawNoise(now) {
+            if (now - last < frameInterval) { requestAnimationFrame(drawNoise); return; }
+            const dt = (now - last) / 1000; last = now; t += dt;
+
+            // base random static (lower variance)
+            for (let i = 0; i < data.length; i += 4) {
+                const base = 100 + Math.random() * 70; // mid-gray with modest spread
+                data[i] = data[i + 1] = data[i + 2] = base;
+                data[i + 3] = 255;
+            }
+
+            // slow drifting luminance band (subtle)
+            const bandY = Math.floor(((t * 20) % smallH));
+            for (let y = bandY - 3; y < bandY + 3; y++) {
+                if (y < 0 || y >= smallH) continue;
+                for (let x = 0; x < smallW; x++) {
+                    const idx = (y * smallW + x) * 4;
+                    data[idx] = Math.min(255, data[idx] + 10);
+                    data[idx + 1] = Math.min(255, data[idx + 1] + 10);
+                    data[idx + 2] = Math.min(255, data[idx + 2] + 10);
+                }
+            }
+
+            // sparse white-noise speckles
+            const speckles = Math.floor((smallW * smallH) * 0.002); // 0.2%
+            for (let s = 0; s < speckles; s++) {
+                const x = (Math.random() * smallW) | 0; const y = (Math.random() * smallH) | 0;
+                const idx = (y * smallW + x) * 4;
+                data[idx] = data[idx + 1] = data[idx + 2] = 255;
+            }
+
+            // temporal blend with previous frame for smoother, cinematic grain
+            if (prev && prev.length === data.length) {
+                const blend = 0.85; // keep 85% of previous frame
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] = data[i] * (1 - blend) + prev[i] * blend;
+                    data[i + 1] = data[i + 1] * (1 - blend) + prev[i + 1] * blend;
+                    data[i + 2] = data[i + 2] * (1 - blend) + prev[i + 2] * blend;
+                }
+            }
+            prev = new Uint8ClampedArray(data);
+
+            // draw upscaled
+            const off = document.createElement('canvas');
+            off.width = smallW; off.height = smallH;
+            const octx = off.getContext('2d');
+            octx.putImageData(buffer, 0, 0);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(off, 0, 0, w, h);
+
+            requestAnimationFrame(drawNoise);
+        }
+        requestAnimationFrame(drawNoise);
+
+        // ===== Optional: allow custom text via hash, e.g. #NO SIGNAL =====
+        const hashText = decodeURIComponent(location.hash.replace('#', '').trim());
+        if (hashText) {
+            title.dataset.text = hashText.toUpperCase();
+            title.setAttribute('aria-label', hashText.toUpperCase());
+            title.innerHTML = [...title.dataset.text].map(ch => `<span>${ch === ' ' ? '&nbsp;' : ch}</span>`).join('');
+        }
+    </script>
+</body>
+
+</html>

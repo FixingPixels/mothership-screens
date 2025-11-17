@@ -1,0 +1,8 @@
+camId,section,location,status,distance,hudText,imageUrl,panEnabled,panDuration,glitchMinMs,glitchMaxMs
+cam-corridor,SECTION A,A-03 CORRIDOR (MAIN),ONLINE,14m,ZOOM: 1.0x  |  PAN: H-AXIS,img/A03-corridor.jpg,true,7,400,1200
+cam-med,SECTION A,A-05 MEDBAY,ONLINE,7m,ZOOM: 1.2x  |  PAN: H-AXIS,img/A05-Medbay.jpg,true,7,400,1200
+cam-command,SECTION A,A-01 COMMAND,ONLINE,5m,ZOOM: 0.9x  |  PAN: H-AXIS,img/A01-Command.jpg,true,7,400,1200
+cam-cargo,SECTION B,B-12 CARGO BAY,FLICKER,28m,ZOOM: 0.8x  |  PAN: H-AXIS  |  SIGNAL DEGRADED,img/B12-cargo-bay.jpg,true,9,750,2200
+cam-duct,SECTION B,B-37 AIR DUCT,INTERFERENCE,3m,ZOOM: 1.5x  |  STATIC  |  SIGNAL WEAK,img/B37-air-duct.jpg,true,6,400,1200
+cam-reactor,SECTION C,C-01 REACTOR CORE,LOST SIGNAL,--,SIGNAL LOST  |  SEARCHING...,,false,7,200,600
+

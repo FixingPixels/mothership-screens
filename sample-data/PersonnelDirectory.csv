@@ -1,0 +1,6 @@
+personnelId,name,position,clearance,notes,status,isConfidential,password,rowClass,notesClass
+thorne-a,Dr. Aris Thorne,Lead Xenobiologist,LEVEL 4,CLASSIFIED,classified,true,ALPHA-PRIME,,text-red-500
+haas-c,C. Haas,Maintenance Technician,LEVEL 2,Assigned to Deck C,deceased,false,,,text-neutral-400
+edam-g,"Dr. Greta Edam",Research Biologist,LEVEL 3,Station Transfer,active,false,,,text-yellow-400
+hinton-s,Hinton (Synthetic),Science Officer,LEVEL 3,Model WY-SCI-800,active,false,,,text-neutral-400
+

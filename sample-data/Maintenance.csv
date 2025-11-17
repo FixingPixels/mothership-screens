@@ -1,0 +1,13 @@
+timestamp,techId,logEntry,status,entryClass,statusClass,rowClass,colspan
+2279.08.09 // 14:30,755-A,Routine service. Primary filter replaced.,NOMINAL,,,
+2279.08.11 // 09:15,755-A,CO2 levels spiking 8%. Cleaned secondary filter. Levels normalizing.,NOMINAL,,,
+2279.08.12 // 21:05,755-A,"Reports of ""odd smell"" from science lab. Vents check clean.",NOMINAL,,,
+2279.08.13 // 04:12,755-A,Pressure fluctuation alarm. Found <span class='bg-neutral-800 p-1'>unidentified organic biomass</span> in primary filter. Sampled. Cleaned.,WARNING,text-yellow-400,,
+2279.08.13 // 18:00,M.U.T.H.R.,Automatic purge cycle initiated. [ERR: CYCLE FAILED 0x88],WARNING,,,
+2279.08.13 // 18:05,M.U.T.H.R.,Automatic purge cycle initiated. [ERR: CYCLE FAILED 0x88],WARNING,,,
+2279.08.14 // 01:50,755-A,"Filter is... clogged. It's solid. Can't clear it. Trying manual override. Smells like... god, it smells awful.",CRITICAL,text-red-500,,
+2279.08.14 // 02:30,M.U.T.H.R.,AIR QUALITY DECK C: 40% [UNSAFE]. ALL VENTS SEALED.,CRITICAL,text-red-500,,
+2279.08.14 // 02:32,M.U.T.H.R.,Life signs (HAAS, C.) not detected.,CRITICAL,,,
+2279.08.14 // 03:00,M.U.T.H.R.,[...automatic logging... system pressure fluctuating... integrity failing...],FAILURE,text-yellow-400,,
+,,[...CONNECTION TO COMPONENT LOST...],,text-neutral-600 p-4,,,4
+

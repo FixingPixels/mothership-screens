@@ -1,0 +1,9 @@
+key,value
+title,Maintenance Log
+component,COMPONENT: AIR SCRUBBER 02 // DECK C (SCIENCE)
+statusText,:: STATUS: FAILURE IMMINENT ::
+statusSubtext,AUTO-LOGGING ACTIVE
+componentId,WY-SCRUB-02C-8800
+lastServiced,2279.08.13
+assignedTech,C. HAAS (755-A)
+

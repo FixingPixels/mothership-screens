@@ -1,0 +1,10 @@
+fileId,filename,size,modified,notes,isClickable,status,rowClass,notesClass
+log-entry-edam-1,log_entry_881M.log,1.2 KB,2279.08.14,Preliminary Assessment,true,normal,,text-yellow-400
+log-entry-edam-2,log_entry_882M.log,1.1 KB,2279.09.07,Viral Acoustics,true,normal,,text-yellow-400
+log-entry-edam-3,log_entry_883M.log,1.6 KB,2279.09.11,The Krebslieder,true,normal,,text-yellow-400
+maint-scrubber,maint_SCRUBBER_02.log,8.8 KB,2279.08.14,::FAILURE::,false,normal,,text-red-500
+system-kernel,SYSTEM_KERNEL.dll,8812.0 KB,2278.01.03,[SYS_FILE],false,system,text-neutral-500,
+corrupted-file,[CORRUPTED_0x88],--,--,READ ERROR,false,corrupted,text-red-500,
+urgent-readme,!URGENT_README!.txt,0.8 KB,2279.08.14,,false,normal,,text-yellow-400
+shift-roster,shift_roster_c_deck.pdf,102.3 KB,2279.08.10,,false,normal,,
+

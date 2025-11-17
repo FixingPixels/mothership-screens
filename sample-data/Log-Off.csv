@@ -1,0 +1,7 @@
+order,type,text,delay,underline
+1,linebreak,,,
+2,line,"Logging off... Secure connection terminated.",,
+3,linebreak,,,
+4,line,"Good luck.",,TRUE
+5,delay,,2,,
+

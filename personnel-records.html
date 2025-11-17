@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PERSONNEL DIRECTORY :: MUTHER-8800 :: USCSS MONTERO</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts (Orbitron for headers, Share Tech Mono for body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/file-browser.css">
+    
+    <script>
+        /* Configure Tailwind to use our custom fonts */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Orbitron', 'sans-serif'],
+                        'mono': ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        'primary-yellow': '#fcee0a',
+                    },
+                    borderRadius: {
+                        'none': '0',
+                        'sm': '0',
+                        'md': '0',
+                        'lg': '0',
+                        'xl': '0',
+                        '2xl': '0',
+                        '3xl': '0',
+                        'full': '0',
+                    },
+                    boxShadow: {
+                        'glow-yellow': '0 0 15px rgba(250, 204, 21, 0.5), 0 0 3px rgba(250, 204, 21, 0.8)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-black text-neutral-300 min-h-screen p-4 md:p-8">
+
+    <!-- Main Directory View Container -->
+    <div id="directory-view">
+        <div class="max-w-6xl mx-auto border-2 border-primary-yellow bg-neutral-950 shadow-glow-yellow">
+            
+            <!-- HEADER -->
+            <header class="p-4 border-b-2 border-primary-yellow">
+                <h1 id="page-title" class="font-sans text-2xl md:text-4xl text-primary-yellow uppercase tracking-widest">
+                    Personnel Directory
+                </h1>
+                <p class="text-neutral-400 text-lg">
+                    USCSS MONTERO // CREW MANIFEST
+                </p>
+            </header>
+
+            <!-- PERSONNEL LIST -->
+            <main class="p-6 md:p-8">
+                <div class="font-mono text-base bg-black/50 border border-neutral-700 h-96 overflow-y-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="w-1/12 font-sans text-primary-yellow uppercase">Status</th>
+                                <th class="w-3/12 font-sans text-primary-yellow uppercase">Name</th>
+                                <th class="w-3/12 font-sans text-primary-yellow uppercase">Position</th>
+                                <th class="w-2/12 font-sans text-primary-yellow uppercase">Clearance</th>
+                                <th class="w-3/12 font-sans text-primary-yellow uppercase">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="directory-table-body">
+                            <!-- Directory rows will be dynamically loaded here -->
+                            <tr id="loading-row">
+                                <td colspan="5" class="text-center text-neutral-500 py-8">
+                                    <div class="inline-block">Loading personnel directory...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+
+            <!-- FOOTER ACTIONS -->
+            <footer class="flex flex-col md:flex-row justify-between items-center gap-3 p-4 border-t-2 border-neutral-700 bg-black/30">
+                <div id="footer-stats" class="text-neutral-500">
+                    -- Personnel Records // MONTERO CREW MANIFEST
+                </div>
+            </footer>
+
+        </div>
+    </div>
+    <!-- END Directory View -->
+
+    <!-- Personnel Record Views Container -->
+    <!-- Personnel record views will be dynamically generated here -->
+    <div id="personnel-content-container"></div>
+    <!-- END Personnel Record Views Container -->
+
+    <!-- Password Modal -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full border-2 border-red-500 bg-neutral-950 shadow-glow-yellow">
+            <header class="p-4 border-b-2 border-red-500 bg-red-900/20">
+                <h2 class="font-sans text-xl text-red-500 uppercase tracking-widest">
+                    :: CLASSIFIED ACCESS ::
+                </h2>
+                <p class="text-neutral-400 text-sm mt-1">SECURITY CLEARANCE REQUIRED</p>
+            </header>
+            <main class="p-6">
+                <p class="text-neutral-300 mb-4">This personnel record is classified. Enter authorization code to proceed.</p>
+                <div>
+                    <label class="block text-xs uppercase text-neutral-500 mb-2">Authorization Code</label>
+                    <input 
+                        type="password" 
+                        id="password-input" 
+                        class="w-full bg-black border-2 border-neutral-700 text-primary-yellow p-3 font-mono focus:border-primary-yellow outline-none"
+                        placeholder="Enter code..."
+                    />
+                </div>
+                <div id="password-error" class="hidden mt-3 text-red-500 text-sm">
+                    :: ACCESS DENIED :: Incorrect authorization code.
+                </div>
+            </main>
+            <footer class="flex gap-3 p-4 border-t-2 border-neutral-700 bg-black/30">
+                <button 
+                    onclick="cancelPasswordPrompt()"
+                    class="flex-1 font-sans uppercase bg-neutral-800 border-2 border-neutral-600 text-neutral-400 px-6 py-2 hover:bg-neutral-700 transition-all duration-150">
+                    Cancel
+                </button>
+                <button 
+                    onclick="submitPassword()"
+                    class="flex-1 font-sans uppercase bg-neutral-800 border-2 border-primary-yellow text-primary-yellow px-6 py-2 hover:bg-primary-yellow hover:text-black transition-all duration-150">
+                    Access Record
+                </button>
+            </footer>
+        </div>
+    </div>
+    <!-- END Password Modal -->
+
+    <!-- JavaScript -->
+    <script src="js/personnel-records.js"></script>
+
+</body>
+</html>
+
